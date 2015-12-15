@@ -13,7 +13,6 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
     "test",
     "tests"
   ],
@@ -35,5 +34,14 @@
     "ngstorage": "https://github.com/gsklee/ngStorage.git#~0.3.10",
     "moment": "~2.10.6",
     "jquery": "~2.1.4"
+  },
+  "overrides":{
+    "bootstrap" : {
+         "main": [
+            "less/bootstrap.less",
+            "dist/css/bootstrap.css",
+            "dist/js/bootstrap.js"
+          ]
+    }
   }
 }
