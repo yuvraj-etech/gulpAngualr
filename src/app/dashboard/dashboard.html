@@ -15,7 +15,7 @@
                                 <button ng-click="deleteSelected()" class="btn btn-primary">Delete Selected</button>
                                 <div ui-tree="treeOptions" ng-keydown="$event.which === 27 && showEditRow(x)">
                                     <ol ui-tree-nodes ng-model="data">
-                                        <li ng-repeat="x in data" ui-tree-node>
+                                        <li ng-repeat="x in data track by $index" ui-tree-node>
                                             <div ui-tree-handle>
                                                 <div class="row" ng-class="(x.task_status == 'No') ? 'red' : 'grey'">
                                                     <div class="col-sm-2"><input type="checkbox" ng-checked="selection.indexOf(x.id) > -1" ng-click="selectedIds(x.id, $index)" /></div>

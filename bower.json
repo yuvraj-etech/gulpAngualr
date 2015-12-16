@@ -34,7 +34,8 @@
     "ngstorage": "https://github.com/gsklee/ngStorage.git#~0.3.10",
     "moment": "~2.10.6",
     "jquery": "~2.1.4",
-    "angularjs-datepicker": "https://github.com/720kb/angular-datepicker.git#~0.2.16"
+    "angularjs-datepicker": "https://github.com/720kb/angular-datepicker.git#~0.2.16",
+    "angular-resource": "~1.4.8"
   },
   "overrides": {
     "bootstrap": {

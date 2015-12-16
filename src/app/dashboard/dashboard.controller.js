@@ -1,24 +1,26 @@
 (function() {
     'use strict';
     angular.module('userTaskModule')
-            .controller('dashboard', dashboard);
+        .controller('dashboard', dashboard);
 
-    function dashboard($scope, timeStorageService, ajaxRequest, $log, $state, deleteSelectedTask) {
+    function dashboard($scope, timeStorageService, ajaxRequest, $log, $state, deleteSelectedTask, resourseService) {
         var userObject = timeStorageService.get();
         if (angular.isUndefined(userObject) || userObject == null) {
             $log.warn('Please Login First');
             $state.go('/');
         } else {
             var email = userObject.email;
-            ajaxRequest.send('user_data.php', {email: email}, 'POST').then(function(response) {
-                $scope.userData = response;
-            }, function(response) {
-                $log.debug(response);
+            var query = resourseService.api('user_data.php', {
+                email: email
+            }).userMethod();
+            query.$promise.then(function(data) {
+                $scope.userData = data[0];
             });
-            ajaxRequest.send('allTask.php', {email: email}, 'POST').then(function(response) {
-                $scope.data = response;
-            }, function(response) {
-                $log.error(response);
+            var query1 = resourseService.api('allTask.php', {
+                email: email
+            }).userMethod();
+            query1.$promise.then(function(data) {
+                $scope.data = data;
             });
         }
         $scope.show = false;
@@ -31,43 +33,50 @@
         };
         $scope.deleteTask = function(data) {
             $scope.data.shift(data);
-            ajaxRequest.send('deleteTask.php', {taskId: data.id}, 'POST').then(function(response) {
-                $log.info(response);
-            }, function(response) {
-                $log.error(response);
+            var query = resourseService.api('deleteTask.php', {
+                taskId: data.id
+            }).userMethod();
+            query.$promise.then(function(data) {
+                $log.info(data[0]);
             });
         };
         $scope.showEditRow = function(r) {
             if ($scope.active != r) {
                 $scope.active = r;
                 $scope.isFocused = r;
-            }
-            else {
+            } else {
                 $scope.active = null;
                 $scope.isFocused = null;
             }
         };
         $scope.saveEditTask = function(data) {
             $scope.active = null;
-            ajaxRequest.send('updateTask.php', {taskId: data.id, newTaskName: data.task_name, newDueDate: data.due_date, newTaskStatus: data.task_status}, 'POST').then(function(response) {
+            var query = resourseService.api('updateTask.php', {
+                taskId: data.id,
+                newTaskName: data.task_name,
+                newDueDate: data.due_date,
+                newTaskStatus: data.task_status
+            }).userMethod();
+            query.$promise.then(function(data) {
+                $log.info(data[0]);
                 $scope.isFocused = false;
-            }, function(response) {
-                $log.error(response);
             });
         };
         $scope.addTask = function() {
-            $scope.data.unshift({task_status: 'No', task_name: $scope.taskName, due_date: $scope.dueDate});
+            $scope.data.unshift({
+                task_status: 'No',
+                task_name: $scope.taskName,
+                due_date: $scope.dueDate
+            });
             var email = userObject.email;
-            ajaxRequest.send('addTask.php', {taskName: $scope.taskName, dueDate: $scope.dueDate, userEmail: email}, 'POST').then(function(response) {
-//                ajaxRequest.send('allTask.php', {email: email}, 'POST').then(function(response) {
-//                    $scope.data = response;
-//                }, function(response) {
-//                    $log.error(response);
-//                });
-                $scope.taskName = "";
-                $scope.dueDate = "";
-            }, function(response) {
-                $log.error(response);
+
+            var query = resourseService.api('addTask.php', {
+                taskName: $scope.taskName,
+                dueDate: $scope.dueDate,
+                userEmail: email
+            }).userMethod();
+            query.$promise.then(function(data) {
+                $log.info(data[0]);
             });
         }
 
@@ -78,22 +87,18 @@
             var idx = $scope.selection.indexOf(taskId);
             if (idx > -1) {
                 $scope.selection.splice(idx, 1);
-            }
-            else {
+            } else {
                 $scope.selection.push(taskId);
                 $scope.index.push(index);
                 $scope.deleteSelected = function() {
-                    deleteSelectedTask.remove($scope.selection, $scope.index).then(function() {
-                    },
-                            function() {
-                            },
-                            function(index) {
-                                $scope.data.splice(index, 1);
-                            });
+                    deleteSelectedTask.remove($scope.selection, $scope.index).then(function() {},
+                        function() {},
+                        function(index) {
+                            $scope.data.splice(index, 1);
+                        });
                 }
             }
-        }
-        ;
+        };
 
 
         $scope.treeOptions = {
@@ -109,7 +114,10 @@
                 }
                 for (var i = 0; i < arr.length; i++) {
                     var taskId = arr[i].id;
-                    ajaxRequest.send('changeOrderNo.php', {taskId: taskId, newOrderNo: i}, 'POST').then(function(response) {
+                    ajaxRequest.send('changeOrderNo.php', {
+                        taskId: taskId,
+                        newOrderNo: i
+                    }, 'POST').then(function(response) {
 
                     }, function(response) {
                         $log.error(response);
@@ -120,6 +128,5 @@
 
 
 
-    }
-    ;
+    };
 })();
