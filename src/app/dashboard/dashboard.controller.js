@@ -3,22 +3,18 @@
     angular.module('userTaskModule')
         .controller('dashboard', dashboard);
 
-    function dashboard($scope, timeStorageService, ajaxRequest, $log, $state, deleteSelectedTask, resourseService) {
+    function dashboard($scope, timeStorageService, ajaxRequest, $log, $state, deleteSelectedTask, userDataFactory, allTaskFactory, deleteTaskFactory, updateTaskFactory, addTaskFactory, changeOrderNoFactory) {
         var userObject = timeStorageService.get();
         if (angular.isUndefined(userObject) || userObject == null) {
             $log.warn('Please Login First');
             $state.go('/');
         } else {
             var email = userObject.email;
-            var query = resourseService.api('user_data.php', {
-                email: email
-            }).userMethod();
+            var query = userDataFactory.query({email: email});
             query.$promise.then(function(data) {
-                $scope.userData = data[0];
+                $scope.userData = data;
             });
-            var query1 = resourseService.api('allTask.php', {
-                email: email
-            }).userMethod();
+            var query1 = allTaskFactory.query({email: email});
             query1.$promise.then(function(data) {
                 $scope.data = data;
             });
@@ -33,9 +29,7 @@
         };
         $scope.deleteTask = function(data) {
             $scope.data.shift(data);
-            var query = resourseService.api('deleteTask.php', {
-                taskId: data.id
-            }).userMethod();
+            var query = deleteTaskFactory.query({taskId: data.id});
             query.$promise.then(function(data) {
                 $log.info(data[0]);
             });
@@ -51,12 +45,7 @@
         };
         $scope.saveEditTask = function(data) {
             $scope.active = null;
-            var query = resourseService.api('updateTask.php', {
-                taskId: data.id,
-                newTaskName: data.task_name,
-                newDueDate: data.due_date,
-                newTaskStatus: data.task_status
-            }).userMethod();
+            var query = updateTaskFactory.query({taskId: data.id, newTaskName: data.task_name, newDueDate: data.due_date, newTaskStatus: data.task_status});
             query.$promise.then(function(data) {
                 $log.info(data[0]);
                 $scope.isFocused = false;
@@ -70,11 +59,7 @@
             });
             var email = userObject.email;
 
-            var query = resourseService.api('addTask.php', {
-                taskName: $scope.taskName,
-                dueDate: $scope.dueDate,
-                userEmail: email
-            }).userMethod();
+            var query = addTaskFactory.query({taskName: $scope.taskName, dueDate: $scope.dueDate, userEmail: email});
             query.$promise.then(function(data) {
                 $log.info(data[0]);
             });
@@ -114,14 +99,11 @@
                 }
                 for (var i = 0; i < arr.length; i++) {
                     var taskId = arr[i].id;
-                    ajaxRequest.send('changeOrderNo.php', {
-                        taskId: taskId,
-                        newOrderNo: i
-                    }, 'POST').then(function(response) {
 
-                    }, function(response) {
-                        $log.error(response);
-                    });
+                    var query = changeOrderNoFactory.query({taskId: taskId, newOrderNo: i});
+                    query.$promise.then(function(data) {
+                    $log.info(data[0]);
+            });
                 }
             }
         };
